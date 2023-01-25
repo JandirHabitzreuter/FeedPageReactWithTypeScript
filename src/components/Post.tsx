@@ -1,6 +1,6 @@
 import { format, formatDistanceToNow } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
-import { useState } from 'react';
+import { ChangeEvent, FormEvent, InvalidEvent, useState } from 'react';
 
 import { Avatar } from './Avatar';
 import { Comment } from './Comment';
@@ -13,16 +13,19 @@ interface Author {
   avatarUrl : string;
 }
 
-interface PostPros {
-  author : Author;
-  publishedAt : Date;
+interface Content{
+  type: 'paragraph' | 'link';
   content : string;
 }
 
+interface PostPros {
+  author : Author;
+  publishedAt : Date;
+  content : Content[];
+}
+
 export function Post({ author, publishedAt, content }: PostPros) {
-  const [comments, setComments] = useState([
-    
-  ]);
+  const [comments, setComments] = useState(['']);
 
   const [newCommentText, setNewCommentText] = useState('');
 
@@ -35,19 +38,23 @@ export function Post({ author, publishedAt, content }: PostPros) {
     addSuffix: true
   });
 
-  function handleCrateNewComment() {
+  function handleCrateNewComment(event: FormEvent) {
     event.preventDefault()
 
     setComments([...comments, newCommentText]);
     setNewCommentText('');
   }
 
-  function handleNewCommentChange() {
+  function handleNewCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
     event.target.setCustomValidity('');  
     setNewCommentText(event.target.value);
   }
 
-  function deleteComment(commentToDelete) {
+  function handleNewCommentInvalid(event: InvalidEvent<HTMLTextAreaElement>){
+    event.target.setCustomValidity('This field  is required!!!');  
+  }
+
+  function deleteComment(commentToDelete : string) {
     const newComments = comments.filter(comment =>{
       return comment != commentToDelete;
     });
@@ -55,9 +62,7 @@ export function Post({ author, publishedAt, content }: PostPros) {
     setComments(newComments);
   }
 
-  function handleNewCommentInvalid(){
-    event.target.setCustomValidity('This field  is required!!!');  
-  }
+
 
   const isNewCommentEmpty= newCommentText.length === 0;
 
